@@ -6,12 +6,14 @@ import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import br.com.versalius.e_stokrootsilver.activities.AccountSettingsActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,4 +56,23 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+//            startActivity(new Intent(this, SettingsActivity.class));
+            startActivity(new Intent(this, AccountSettingsActivity.class));
+        } else if (id == R.id.action_logout) {
+//            showCloseDialog();
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 }
