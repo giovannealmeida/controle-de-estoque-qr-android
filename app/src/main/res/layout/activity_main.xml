@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="br.com.versalius.e_stokrootsilver.MainActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_below="@id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_margin="15dp"
+                android:background="@android:color/darker_gray"
+                android:gravity="center"
+                android:text="LOGO"
+                android:textSize="20sp" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btScan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/rounded_scan_button"
+                android:drawableLeft="@drawable/qrcode_scan"
+                android:drawableStart="@drawable/qrcode_scan"
+                android:padding="12dp"
+                android:text="Leitor de Qr Code"
+                android:textColor="@android:color/white" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btNewUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/rounded_new_client_button"
+                android:drawableLeft="@drawable/ic_person_add"
+                android:drawableStart="@drawable/ic_person_add"
+                android:padding="12dp"
+                android:text="Novo Usuário"
+                android:textColor="@color/bt_new_client" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btSellList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/rounded_sell_list_button"
+                android:drawableLeft="@drawable/ic_shopping_cart"
+                android:drawableStart="@drawable/ic_shopping_cart"
+                android:padding="12dp"
+                android:text="Lista de vendas"
+                android:textColor="@color/bt_sell_list" />
+
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+</RelativeLayout>
