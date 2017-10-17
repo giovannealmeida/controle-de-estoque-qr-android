@@ -88,4 +88,44 @@
     <string name="pref_title_display_email">E-mail</string>
     <string name="pref_title_display_password">Password</string>
     <string name="pref_title_display_cpf">CPF</string>
+
+    <string-array name="array_states">
+        <item>Selecione um estado…</item> <!-- Valor default -->
+        <item>Acre</item>
+        <item>Alagoas</item>
+        <item>Amapá</item>
+        <item>Amazonas</item>
+        <item>Bahia</item>
+        <item>Ceará</item>
+        <item>Distrito Federal</item>
+        <item>Espírito Santo</item>
+        <item>Goiás</item>
+        <item>Maranhão</item>
+        <item>Mato Grosso</item>
+        <item>Mato Grosso do Sul</item>
+        <item>Minas Gerais</item>
+        <item>Pará</item>
+        <item>Paraíba</item>
+        <item>Paraná</item>
+        <item>Pernambuco</item>
+        <item>Piauí</item>
+        <item>Rio de Janeiro</item>
+        <item>Rio Grande do Norte</item>
+        <item>Rio Grande do Sul</item>
+        <item>Rondônia</item>
+        <item>Roraima</item>
+        <item>Santa Catarina</item>
+        <item>Sergipe</item>
+        <item>São Paulo</item>
+        <item>Tocantins</item>
+    </string-array>
+
+    <string-array name="cities">
+        <item>Escolha uma cidade...</item>
+        <item>Cidade 1</item>
+        <item>Cidade 2</item>
+        <item>Cidade 4</item>
+        <item>Cidade 5</item>
+        <item>Cidade 6</item>
+    </string-array>
 </resources>

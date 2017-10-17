@@ -3,7 +3,6 @@ package br.com.versalius.e_stokrootsilver;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +13,8 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import br.com.versalius.e_stokrootsilver.activities.AccountSettingsActivity;
+import br.com.versalius.e_stokrootsilver.activities.NewClientActivity;
+import br.com.versalius.e_stokrootsilver.activities.SellsListActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,11 +27,24 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Vendedor: John Doe");
 
-        AppCompatButton btScan = (AppCompatButton) findViewById(R.id.btScan);
-        btScan.setOnClickListener(new View.OnClickListener() {
+        (findViewById(R.id.btScan)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new IntentIntegrator(MainActivity.this).initiateScan(); // `this` is the current Activity
+            }
+        });
+
+        (findViewById(R.id.btNewUser)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, NewClientActivity.class));
+            }
+        });
+
+        (findViewById(R.id.btSellList)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SellsListActivity.class));
             }
         });
     }

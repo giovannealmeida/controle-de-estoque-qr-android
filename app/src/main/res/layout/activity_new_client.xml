@@ -13,41 +13,6 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Vinculado a"
-            android:layout_marginBottom="16dp"
-            android:textAppearance="?android:textAppearanceLarge" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@android:color/darker_gray"
-                android:gravity="center"
-                android:text="LOGO" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:text="Loja 1"
-                android:textAppearance="?android:textAppearanceMedium" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="25dp"
-            android:background="@color/colorAccent" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,6 +29,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
                     android:hint="Nome"
+                    android:imeOptions="actionNext"
                     android:inputType="textCapWords"
                     android:maxLines="1" />
             </android.support.design.widget.TextInputLayout>
@@ -79,6 +45,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:hint="Sobrenome"
+                    android:imeOptions="actionNext"
                     android:inputType="textCapWords"
                     android:maxLines="1" />
             </android.support.design.widget.TextInputLayout>
@@ -93,6 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="CPF"
+                android:imeOptions="actionNext"
                 android:inputType="number"
                 android:maxLines="1" />
         </android.support.design.widget.TextInputLayout>
@@ -106,17 +74,47 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="E-mail"
+                android:imeOptions="actionNext"
                 android:inputType="textEmailAddress"
                 android:maxLines="1" />
         </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/etPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Telefone"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLines="1" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Spinner
+            android:id="@+id/spState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:entries="@array/array_states"
+            android:padding="6dp" />
+
+        <Spinner
+            android:id="@+id/spCity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:entries="@array/cities"
+            android:padding="6dp" />
 
         <android.support.v7.widget.AppCompatButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:background="@drawable/rounded_scan_button"
-            android:text="Salvar"
+            android:text="Cadastrar"
             android:textColor="@android:color/white" />
-
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>
