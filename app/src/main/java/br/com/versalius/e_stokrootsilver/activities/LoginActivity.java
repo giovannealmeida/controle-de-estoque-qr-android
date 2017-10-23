@@ -18,8 +18,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import br.com.versalius.e_stokrootsilver.MainActivity;
 import br.com.versalius.e_stokrootsilver.R;
+import br.com.versalius.e_stokrootsilver.model.User;
+import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
+import br.com.versalius.e_stokrootsilver.network.ResponseCallback;
+import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
 
 /**
  * A login screen that offers login via email/password.
@@ -29,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     // UI references.
     private EditText mEmailView;
     private EditText mPasswordView;
+    private TextView tvMessage;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -36,6 +46,9 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        tvMessage = (TextView) findViewById(R.id.tvMessage);
+
         // Set up the login form.
         mEmailView = (EditText) findViewById(R.id.email);
 
@@ -73,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
+        tvMessage.setText("");
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
@@ -107,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            doLogin();
+            doLogin(email, password);
         }
     }
 
@@ -123,11 +137,40 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Envia usuário e senha para o webservice e tenta fazer login
      */
-    private void doLogin (){
-        showProgress(false);
-        startActivity(new Intent(this,MainActivity.class));
-        finish();
+    private void doLogin(String email, String password) {
+        showProgress(true);
+
+        NetworkHelper.getInstance(this).doLogin(email, password, new ResponseCallback() {
+            @Override
+            public void onSuccess(String jsonStringResponse) {
+                try {
+                    JSONObject jsonObject = new JSONObject(jsonStringResponse);
+                    if(jsonObject.getBoolean("status")){
+                        User user = new User(jsonObject.getJSONObject("data"));
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("user",user);
+
+                        new SessionHelper(LoginActivity.this).saveUser(user);
+
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class).putExtras(bundle));
+                        finish();
+                    } else {
+                        tvMessage.setText(jsonObject.getString("message"));
+                        showProgress(false);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFail(VolleyError error) {
+                tvMessage.setText("Falha ao tentar se conectar. Tente novamente mais tarde.");
+                showProgress(false);
+            }
+        });
     }
+
     /**
      * Shows the progress UI and hides the login form.
      */
@@ -137,23 +180,23 @@ public class LoginActivity extends AppCompatActivity {
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
+        mProgressView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
 //        } else {
 //            // The ViewPropertyAnimator APIs are not available, so simply show
 //            // and hide the relevant UI components.

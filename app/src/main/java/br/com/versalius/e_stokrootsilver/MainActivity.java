@@ -13,8 +13,11 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import br.com.versalius.e_stokrootsilver.activities.AccountSettingsActivity;
+import br.com.versalius.e_stokrootsilver.activities.LoginActivity;
 import br.com.versalius.e_stokrootsilver.activities.NewClientActivity;
 import br.com.versalius.e_stokrootsilver.activities.SellsListActivity;
+import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
+import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +25,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(!new SessionHelper(this).isLogged()){
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

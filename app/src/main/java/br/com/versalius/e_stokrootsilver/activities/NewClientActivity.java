@@ -62,12 +62,10 @@ public class NewClientActivity extends AppCompatActivity {
 
     public class CustomSpinnerAdapter extends BaseAdapter implements SpinnerAdapter {
 
-        private final Context activity;
         private List<String> asr;
 
         public CustomSpinnerAdapter(Context context,List<String> asr) {
             this.asr=asr;
-            activity = context;
         }
 
         public int getCount()

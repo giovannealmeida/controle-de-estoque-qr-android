@@ -8,4 +8,10 @@
     <color name="bt_scan">@color/colorAccent</color>
     <color name="bt_new_client">#1b5e20</color>
     <color name="bt_sell_list">#6a1b9a</color>
+
+    <!--SnackBar-->
+    <color name="snackBackgroundError">#992222</color>
+    <color name="snackBackgroundSuccess">#48AA48</color>
+    <color name="snackBackgroundInfo">#2196f3</color>
+
 </resources>
