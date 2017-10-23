@@ -6,11 +6,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
-import java.util.StringTokenizer;
 
 import br.com.versalius.e_stokrootsilver.R;
 import br.com.versalius.e_stokrootsilver.activities.SellActivity;
@@ -21,29 +21,29 @@ import br.com.versalius.e_stokrootsilver.model.Sell;
  * Created by Giovanne on 17/10/2017.
  */
 
-public class SellsListAdapter extends RecyclerView.Adapter<SellsListAdapter.ViewHolder> {
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
     private Context context;
-    private List<Sell> list;
+    private List<Product> list;
+    private Sell sell;
     private LayoutInflater inflater;
 
-    public SellsListAdapter(Context context, List<Sell> list) {
+    public ProductAdapter(Context context, Sell sell) {
         this.context = context;
-        this.list = list;
+        this.list = sell.getProducts();
+        this.sell = sell;
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(inflater.inflate(R.layout.item_sell, parent, false));
-
+        return new ViewHolder(inflater.inflate(R.layout.item_product, parent, false));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.tvClient.setText(list.get(position).getClient());
-        holder.tvDate.setText(list.get(position).getDate());
-        holder.tvTotalPrice.setText("R$ " + list.get(position).getTotalPrice());
+        holder.tvName.setText(list.get(position).getName());
+        holder.tvPrice.setText("R$ " + list.get(position).getPrice());
     }
 
     @Override
@@ -52,19 +52,19 @@ public class SellsListAdapter extends RecyclerView.Adapter<SellsListAdapter.View
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView tvDate, tvClient, tvTotalPrice;
+        private TextView tvName, tvPrice;
+        private ImageButton btRemove;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            tvDate = itemView.findViewById(R.id.tvDate);
-            tvClient = itemView.findViewById(R.id.tvClient);
-            tvTotalPrice = itemView.findViewById(R.id.tvTotalPrice);
+            tvName = itemView.findViewById(R.id.tvName);
+            tvPrice = itemView.findViewById(R.id.tvPrice);
+            btRemove = itemView.findViewById(R.id.btRemove);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
+            btRemove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    context.startActivity(new Intent(context, SellActivity.class)
-                            .putExtra("sell", list.get(getAdapterPosition())));
+                    Toast.makeText(context, "Produto a ser removido: " + list.get(getAdapterPosition()).getName(), Toast.LENGTH_SHORT).show();
 
                 }
             });

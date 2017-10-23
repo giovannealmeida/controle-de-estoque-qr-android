@@ -1,10 +1,12 @@
 package br.com.versalius.e_stokrootsilver.model;
 
+import java.io.Serializable;
+
 /**
  * Created by Giovanne on 17/10/2017.
  */
 
-public class Product {
+public class Product implements Serializable{
     private int id;
     private String name;
     private String weight;

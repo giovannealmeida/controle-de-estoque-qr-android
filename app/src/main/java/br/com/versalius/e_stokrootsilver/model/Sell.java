@@ -1,5 +1,6 @@
 package br.com.versalius.e_stokrootsilver.model;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
  * Created by Giovanne on 17/10/2017.
  */
 
-public class Sell {
+public class Sell implements Serializable {
     private long id;
     private List<Product> products;
     private String client;
