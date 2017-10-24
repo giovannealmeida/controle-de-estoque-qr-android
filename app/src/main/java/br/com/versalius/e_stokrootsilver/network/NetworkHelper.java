@@ -28,8 +28,7 @@ public class NetworkHelper {
     private static Context context;
     private RequestQueue requestQueue;
 
-    public static final String DOMINIO = "http://10.1.1.104/caronauesc-web/"; // Repo
-    //public static final String DOMINIO = "http://10.66.7.16/caronauesc-web/"; // Repo UDO
+    public static final String DOMINIO = "http://192.168.1.106/controle-de-estoque-qr-web/"; //local
 
     private final String API = "api/";
     /*UserService*/
@@ -73,7 +72,7 @@ public class NetworkHelper {
     public void doLogin(String email, String password, ResponseCallback callback) {
         HashMap<String, String> params = new HashMap<>();
         params.put("email", email);
-        params.put("password", EncryptHelper.SHA1(password));
+        params.put("password", password);
         execute(Request.Method.POST, params, TAG, DOMINIO + LOGIN, callback);
     }
 

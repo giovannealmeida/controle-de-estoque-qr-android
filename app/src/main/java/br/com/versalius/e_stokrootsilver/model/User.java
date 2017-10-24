@@ -19,18 +19,19 @@ public class User implements Serializable{
 
     public User(JSONObject json) {
         try {
-            if(json.has("u_id")) {
-                this.id = json.getInt("u_id");
+            if(json.has("id")) {
+                this.id = json.getInt("id");
             }
 
-            this.firstName = json.optString("u_first_name", "User");
-            this.lastName = json.optString("u_last_name", "");
+            String[] name = json.getString("name_fantasy").split(" ");
+            this.firstName = name[0];
+            this.lastName = name[1];
 
-            if(json.has("u_email")) {
-                this.email = json.optString("u_email", "");
+            if(json.has("email")) {
+                this.email = json.optString("email", "");
             }
-            if(json.has("u_password")) {
-                this.password = json.optString("u_password", "");
+            if(json.has("password")) {
+                this.password = json.optString("password", "");
             }
 
         } catch (JSONException e) {

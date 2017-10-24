@@ -49,6 +49,10 @@ public class LoginActivity extends AppCompatActivity {
 
         tvMessage = (TextView) findViewById(R.id.tvMessage);
 
+        if(getIntent().getStringExtra("message")!= null) {
+            tvMessage.setText(getIntent().getStringExtra("message"));
+        }
+
         // Set up the login form.
         mEmailView = (EditText) findViewById(R.id.email);
 
@@ -146,7 +150,7 @@ public class LoginActivity extends AppCompatActivity {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonStringResponse);
                     if(jsonObject.getBoolean("status")){
-                        User user = new User(jsonObject.getJSONObject("data"));
+                        User user = new User(jsonObject.getJSONObject("data").getJSONObject("userData"));
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("user",user);
 

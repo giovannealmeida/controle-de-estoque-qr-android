@@ -16,6 +16,7 @@ import br.com.versalius.e_stokrootsilver.activities.AccountSettingsActivity;
 import br.com.versalius.e_stokrootsilver.activities.LoginActivity;
 import br.com.versalius.e_stokrootsilver.activities.NewClientActivity;
 import br.com.versalius.e_stokrootsilver.activities.SellsListActivity;
+import br.com.versalius.e_stokrootsilver.model.User;
 import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
 import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
 
@@ -31,9 +32,11 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
 
+        User user = (User) getIntent().getExtras().getSerializable("user");
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Vendedor: John Doe");
+        getSupportActionBar().setTitle("Vendedor: "+user.getFirstName()+" "+user.getLastName());
 
         (findViewById(R.id.btScan)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
 //            startActivity(new Intent(this, SettingsActivity.class));
             startActivity(new Intent(this, AccountSettingsActivity.class));
         } else if (id == R.id.action_logout) {
-//            showCloseDialog();
+            new SessionHelper(this).logout();
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
 
