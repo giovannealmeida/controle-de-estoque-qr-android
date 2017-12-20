@@ -42,7 +42,7 @@ public class SellsListAdapter extends RecyclerView.Adapter<SellsListAdapter.View
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.tvClient.setText(list.get(position).getClient());
-        holder.tvDate.setText(list.get(position).getDate());
+        holder.tvDate.setText(list.get(position).getFormattedDate());
         holder.tvTotalPrice.setText("R$ " + list.get(position).getTotalPrice());
     }
 

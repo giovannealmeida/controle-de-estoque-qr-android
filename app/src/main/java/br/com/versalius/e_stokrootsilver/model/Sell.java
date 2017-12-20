@@ -1,6 +1,8 @@
 package br.com.versalius.e_stokrootsilver.model;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -12,13 +14,17 @@ public class Sell implements Serializable {
     private long id;
     private List<Product> products;
     private String client;
-    private String date;
+    private Calendar date;
 
-    public Sell(long id, List<Product> products, String client, String date) {
+    public Sell(long id, List<Product> products, String client, Calendar date) {
         this.id = id;
         this.products = products;
         this.client = client;
         this.date = date;
+    }
+
+    public Sell() {
+
     }
 
     public long getId() {
@@ -33,17 +39,32 @@ public class Sell implements Serializable {
         return client;
     }
 
-    public String getDate() {
+    public Calendar getDate() {
         return date;
+    }
+
+    public String getFormattedDate() {
+        return new SimpleDateFormat("dd/MM/yyyy").format(date.getTime());
     }
 
     public double getTotalPrice(){
         double total = 0;
         if(products != null && !products.isEmpty()){
             for (Product p: products) {
-                total += p.getPrice();
+                total += p.getRetailPrice();
             }
         }
         return total;
+    }
+
+    public void addProduct (Product product){
+        if(this.products == null){
+            products = new ArrayList<>();
+        }
+        this.products.add(product);
+    }
+
+    public void setDate(Calendar date) {
+        this.date = date;
     }
 }

@@ -30,7 +30,7 @@ public class SplashActivity extends AppCompatActivity {
                     try {
                         JSONObject jsonObject = new JSONObject(jsonStringResponse);
                         if(jsonObject.getBoolean("status")){
-                            User user = new User(jsonObject.getJSONObject("data").getJSONObject("userData"));
+                            User user = new User(jsonObject.getJSONObject("data"));
                             Bundle bundle = new Bundle();
                             bundle.putSerializable("user",user);
 

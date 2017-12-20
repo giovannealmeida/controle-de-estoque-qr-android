@@ -125,7 +125,8 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            doLogin(email, password);
+            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+//            doLogin(email, password);
         }
     }
 

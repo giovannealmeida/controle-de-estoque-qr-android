@@ -19,6 +19,7 @@ public class PreferencesHelper {
     public static final String USER_LAST_NAME = "user_last_name";
     public static final String USER_ID = "user_id";
     public static final String USER_EMAIL = "user_email";
+    public static final String CURRENT_SELL_LIST = "current_sell_list";
 
     private static PreferencesHelper instance;
     private SharedPreferences sharedPreferences;
@@ -59,6 +60,12 @@ public class PreferencesHelper {
         editor.commit();
     }
 
+    /**
+     * Retorna o objeto salvo com a chave "key".
+     *
+     * @param key Chave do objeto a ser retornado.
+     * @return Obejto salvo ou uma string vazia caso o objeto não exista.
+     */
     public String load(String key) {
         return sharedPreferences.getString(key, "");
     }

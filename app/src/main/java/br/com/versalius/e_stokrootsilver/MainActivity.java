@@ -7,36 +7,47 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.android.volley.VolleyError;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import br.com.versalius.e_stokrootsilver.activities.AccountSettingsActivity;
 import br.com.versalius.e_stokrootsilver.activities.LoginActivity;
 import br.com.versalius.e_stokrootsilver.activities.NewClientActivity;
+import br.com.versalius.e_stokrootsilver.activities.SellActivity;
 import br.com.versalius.e_stokrootsilver.activities.SellsListActivity;
+import br.com.versalius.e_stokrootsilver.model.Product;
 import br.com.versalius.e_stokrootsilver.model.User;
 import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
+import br.com.versalius.e_stokrootsilver.network.ResponseCallback;
 import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
 
 public class MainActivity extends AppCompatActivity {
+
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(!new SessionHelper(this).isLogged()){
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-        }
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+//        if(!new SessionHelper(this).isLogged()){
+//            startActivity(new Intent(this, LoginActivity.class));
+//            finish();
+//        }
 
-        User user = (User) getIntent().getExtras().getSerializable("user");
+//        User user = (User) getIntent().getExtras().getSerializable("user");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Vendedor: "+user.getFirstName()+" "+user.getLastName());
+//        getSupportActionBar().setTitle("Vendedor: "+user.getFirstName()+" "+user.getLastName());
 
         (findViewById(R.id.btScan)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,11 +79,36 @@ public class MainActivity extends AppCompatActivity {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+
+                getProduct(result.getContents());
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void getProduct(String code) {
+        progressBar.setVisibility(View.VISIBLE);
+        NetworkHelper.getInstance(this).getProductByBarcode(code, new ResponseCallback() {
+            @Override
+            public void onSuccess(String jsonStringResponse) {
+                /* A resposta vem como um array de uma posição contendo o único produto.
+                TODO: Trocar a resposta por JSONObject.*/
+                try {
+                    JSONArray jsonArray = new JSONArray(jsonStringResponse);
+                    Product product = new Product(jsonArray.getJSONObject(0));
+                    startActivity(new Intent(MainActivity.this, SellActivity.class).putExtra("product", product));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                progressBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFail(VolleyError error) {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override

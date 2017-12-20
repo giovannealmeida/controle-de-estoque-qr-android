@@ -1,7 +1,6 @@
 package br.com.versalius.e_stokrootsilver.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.Toast;
 import java.util.List;
 
 import br.com.versalius.e_stokrootsilver.R;
-import br.com.versalius.e_stokrootsilver.activities.SellActivity;
 import br.com.versalius.e_stokrootsilver.model.Product;
 import br.com.versalius.e_stokrootsilver.model.Sell;
 
@@ -21,14 +19,14 @@ import br.com.versalius.e_stokrootsilver.model.Sell;
  * Created by Giovanne on 17/10/2017.
  */
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
+public class SellAdapter extends RecyclerView.Adapter<SellAdapter.ViewHolder> {
 
     private Context context;
     private List<Product> list;
     private Sell sell;
     private LayoutInflater inflater;
 
-    public ProductAdapter(Context context, Sell sell) {
+    public SellAdapter(Context context, Sell sell) {
         this.context = context;
         this.list = sell.getProducts();
         this.sell = sell;
@@ -43,7 +41,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.tvName.setText(list.get(position).getName());
-        holder.tvPrice.setText("R$ " + list.get(position).getPrice());
+        holder.tvPrice.setText("R$ " + list.get(position).getRetailPrice());
     }
 
     @Override
