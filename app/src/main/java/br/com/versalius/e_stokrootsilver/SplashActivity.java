@@ -20,6 +20,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.splash);
 
         final SessionHelper session = new SessionHelper(this);
         if(session.isLogged()){

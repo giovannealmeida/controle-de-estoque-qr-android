@@ -2,6 +2,7 @@ package br.com.versalius.e_stokrootsilver.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
@@ -49,12 +50,25 @@ public class SellActivity extends AppCompatActivity {
                 saveCurrentSell();
                 ((TextView) findViewById(R.id.tvDate)).setText("Data: " + currentSell.getFormattedDate());
                 getSupportActionBar().setTitle("Nova venda");
+
+                if (currentSell.getProducts().size() > 1) {
+                    ((TextView) findViewById(R.id.tvQtdItems)).setText(currentSell.getProducts().size() + " itens");
+                } else {
+                    ((TextView) findViewById(R.id.tvQtdItems)).setText(currentSell.getProducts().size() + " item");
+                }
+
             } else {
                 finish();
             }
         }
 
         ((TextView) findViewById(R.id.tvTotalPrice)).setText("Total: " + currentSell.getTotalPrice() + "");
+        (findViewById(R.id.btScan)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                
+            }
+        });
 
         setupList(currentSell);
     }

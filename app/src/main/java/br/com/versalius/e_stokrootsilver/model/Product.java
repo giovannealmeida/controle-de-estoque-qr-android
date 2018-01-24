@@ -17,7 +17,7 @@ public class Product implements Serializable {
     private int stockQuantity;
     private double retailPrice;
     private double wholesalePrice;
-    private boolean status;
+    private String status;
 
     /*TODO: remover já já*/
     public Product(int id, String name, String sas, double retailPrice) {
@@ -44,13 +44,15 @@ public class Product implements Serializable {
                 this.stockQuantity = json.getInt("quantity_in_stock");
             }
             if (json.has("wholesale_value")) {
-                this.wholesalePrice = json.getDouble("wholesale_value");
+                //O preço vem em String no fomato R$ 0,00
+                this.wholesalePrice = Double.valueOf(json.getString("wholesale_value").substring(3));
             }
             if (json.has("retail_value")) {
-                this.retailPrice = json.getDouble("retail_value");
+                //O preço vem em String no fomato R$ 0,00
+                this.retailPrice = Double.valueOf(json.getString("retail_value").substring(3));
             }
             if (json.has("status")) {
-                this.status = json.getBoolean("status");
+                this.status = json.getString("status");
             }
 
         } catch (JSONException e) {
@@ -86,7 +88,7 @@ public class Product implements Serializable {
         return wholesalePrice;
     }
 
-    public boolean isStatus() {
+    public String getStatus() {
         return status;
     }
 }

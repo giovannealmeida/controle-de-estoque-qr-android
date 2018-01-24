@@ -6,6 +6,7 @@
     <color name="colorAccent">#ff5722</color>
 
     <color name="bt_scan">@color/colorAccent</color>
+    <color name="bt_cancel_sell">#c62828</color>
     <color name="bt_new_client">#1b5e20</color>
     <color name="bt_sell_list">#6a1b9a</color>
 

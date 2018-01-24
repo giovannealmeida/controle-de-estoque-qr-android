@@ -26,11 +26,13 @@ import br.com.versalius.e_stokrootsilver.model.Product;
 import br.com.versalius.e_stokrootsilver.model.User;
 import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
 import br.com.versalius.e_stokrootsilver.network.ResponseCallback;
+import br.com.versalius.e_stokrootsilver.utils.PreferencesHelper;
 import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
 
 public class MainActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
+    private View llPendingSellOptions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,21 +40,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-//        if(!new SessionHelper(this).isLogged()){
-//            startActivity(new Intent(this, LoginActivity.class));
-//            finish();
-//        }
+        llPendingSellOptions = findViewById(R.id.llPendingSellOptions);
 
-//        User user = (User) getIntent().getExtras().getSerializable("user");
+        if(existsPendingSell()){
+            llPendingSellOptions.setVisibility(View.VISIBLE);
+        } else {
+            llPendingSellOptions.setVisibility(View.GONE);
+        }
+        if(!new SessionHelper(this).isLogged()){
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
+
+        User user = (User) getIntent().getExtras().getSerializable("user");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//        getSupportActionBar().setTitle("Vendedor: "+user.getFirstName()+" "+user.getLastName());
+        getSupportActionBar().setTitle("Vendedor: "+user.getFirstName()+" "+user.getLastName());
 
         (findViewById(R.id.btScan)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new IntentIntegrator(MainActivity.this).initiateScan(); // `this` is the current Activity
+                new IntentIntegrator(MainActivity.this).setPrompt("Alinhe o leito com o código de barras do produto.").initiateScan(); // `this` is the current Activity
             }
         });
 
@@ -69,6 +78,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, SellsListActivity.class));
             }
         });
+    }
+
+    private boolean existsPendingSell() {
+        return !PreferencesHelper.getInstance(this).load(PreferencesHelper.CURRENT_SELL_LIST).isEmpty();
     }
 
     // Get the results:
@@ -99,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                     Product product = new Product(jsonArray.getJSONObject(0));
                     startActivity(new Intent(MainActivity.this, SellActivity.class).putExtra("product", product));
                 } catch (JSONException e) {
+                    Toast.makeText(MainActivity.this,"Falha ao obter dados do produto", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
                 progressBar.setVisibility(View.GONE);
@@ -106,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFail(VolleyError error) {
+                Toast.makeText(MainActivity.this,"Falha ao se conectar com o servidor. Tente mais tarde.", Toast.LENGTH_LONG).show();
                 progressBar.setVisibility(View.GONE);
             }
         });

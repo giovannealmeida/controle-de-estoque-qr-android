@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.Calendar;
 
 /**
  * Created by Giovanne on 23/10/2017.
@@ -23,7 +24,7 @@ public class User implements Serializable{
                 this.id = json.getInt("id");
             }
 
-            String[] name = json.getString("name_fantasy").split(" ");
+            String[] name = json.getString("name").split(" ");
             this.firstName = name[0];
             this.lastName = name[1];
 

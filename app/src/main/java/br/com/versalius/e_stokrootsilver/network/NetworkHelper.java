@@ -25,7 +25,7 @@ public class NetworkHelper {
     private static Context context;
     private RequestQueue requestQueue;
 
-    public static final String DOMINIO = "http://192.168.0.11/controle-de-estoque-qr-web/"; //local
+    public static final String DOMINIO = "http://192.168.10.16/controle-de-estoque-qr-web/"; //local
 //    public static final String DOMINIO = "http://50.116.87.140/"; //remoto
 
     private final String API = "api/";
