@@ -1,13 +1,19 @@
 package br.com.versalius.e_stokrootsilver;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
@@ -42,12 +48,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         llPendingSellOptions = findViewById(R.id.llPendingSellOptions);
 
-        if(existsPendingSell()){
-            llPendingSellOptions.setVisibility(View.VISIBLE);
-        } else {
-            llPendingSellOptions.setVisibility(View.GONE);
-        }
-        if(!new SessionHelper(this).isLogged()){
+        if (!new SessionHelper(this).isLogged()) {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Vendedor: "+user.getFirstName()+" "+user.getLastName());
+        getSupportActionBar().setTitle("Vendedor: " + user.getFirstName() + " " + user.getLastName());
 
         (findViewById(R.id.btScan)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,6 +79,21 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, SellsListActivity.class));
             }
         });
+
+        (findViewById(R.id.btCancelSell)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CancelSellDialog dialog = new CancelSellDialog();
+                dialog.show(MainActivity.this.getSupportFragmentManager(), "dialog");
+            }
+        });
+
+        (findViewById(R.id.btContinueSell)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SellActivity.class));
+            }
+        });
     }
 
     private boolean existsPendingSell() {
@@ -90,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() == null) {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+//                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
 
                 getProduct(result.getContents());
@@ -112,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                     Product product = new Product(jsonArray.getJSONObject(0));
                     startActivity(new Intent(MainActivity.this, SellActivity.class).putExtra("product", product));
                 } catch (JSONException e) {
-                    Toast.makeText(MainActivity.this,"Falha ao obter dados do produto", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Falha ao obter dados do produto", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
                 progressBar.setVisibility(View.GONE);
@@ -120,10 +136,20 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFail(VolleyError error) {
-                Toast.makeText(MainActivity.this,"Falha ao se conectar com o servidor. Tente mais tarde.", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Falha ao se conectar com o servidor. Tente mais tarde.", Toast.LENGTH_LONG).show();
                 progressBar.setVisibility(View.GONE);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        if (existsPendingSell()) {
+            llPendingSellOptions.setVisibility(View.VISIBLE);
+        } else {
+            llPendingSellOptions.setVisibility(View.GONE);
+        }
+        super.onResume();
     }
 
     @Override
@@ -152,4 +178,28 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public static class CancelSellDialog extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            final View view = inflater.inflate(R.layout.dialog_default, null);
+            ((TextView) view.findViewById(R.id.tvMessage)).setText("Os dados da venda serão perdidos.");
+
+            return new AlertDialog.Builder(getActivity())
+                    .setView(view)
+                    .setCancelable(true)
+                    .setTitle("Tem certeza?")
+                    .setPositiveButton(getString(R.string.dialog_action_yes),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    PreferencesHelper.getInstance(getActivity()).remove(PreferencesHelper.CURRENT_SELL_LIST);
+                                    ((MainActivity)getActivity()).onResume();
+//                                            .findViewById(R.id.llPendingSellOptions).setVisibility(View.GONE);
+                                }
+                            }
+                    )
+                    .setNegativeButton(getString(R.string.dialog_action_no), null)
+                    .create();
+        }
+    }
 }

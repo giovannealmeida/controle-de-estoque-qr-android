@@ -67,4 +67,8 @@ public class Sell implements Serializable {
     public void setDate(Calendar date) {
         this.date = date;
     }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
 }
