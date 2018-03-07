@@ -5,6 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -25,7 +26,7 @@ public class NetworkHelper {
     private static Context context;
     private RequestQueue requestQueue;
 
-    public static final String DOMINIO = "http://192.168.10.22/controle-de-estoque-qr-web/"; //local
+    public static final String DOMINIO = "http://192.168.1.104/controle-de-estoque-qr-web/"; //local
 //    public static final String DOMINIO = "http://50.116.87.140/"; //remoto
 
     private final String API = "api/";
@@ -33,6 +34,9 @@ public class NetworkHelper {
     private final String LOGIN = API + "Login_controller";
     private final String GET_USER = API + "User_controller";
     private final String GET_PRODUCT = API + "Estoque_controller";
+    private final String GET_CITY = API + "Cities_controller";
+    private final String REGISTER_CLIENT = API + "Cliente_controller/register";
+    private final String CHECK_CPF = API + "Cliente_controller/client_exists";
 
     private NetworkHelper(Context context) {
         this.context = context;
@@ -63,6 +67,10 @@ public class NetworkHelper {
         execute(Request.Method.POST, params, TAG, DOMINIO + LOGIN, callback);
     }
 
+    public void registerClient(HashMap<String, String> params, ResponseCallback callback) {
+        execute(Request.Method.POST, params, TAG, DOMINIO + REGISTER_CLIENT, callback);
+    }
+
     public void getUserById(String id, ResponseCallback callback) {
         HashMap<String, String> params = new HashMap<>();
         params.put("id", id);
@@ -73,6 +81,16 @@ public class NetworkHelper {
                 callback);
     }
 
+    public void cpfExists(String cpf, ResponseCallback callback) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("cpf", cpf);
+        execute(Request.Method.GET,
+                null,
+                TAG,
+                buildGetURL(DOMINIO + CHECK_CPF, params),
+                callback);
+    }
+
     public void getProductByBarcode(String code, ResponseCallback callback) {
         HashMap<String, String> params = new HashMap<>();
         params.put("code", code);
@@ -80,6 +98,16 @@ public class NetworkHelper {
                 null,
                 TAG,
                 buildGetURL(DOMINIO + GET_PRODUCT, params),
+                callback);
+    }
+
+    public void getCityByStateId(int stateId, ResponseCallback callback) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("state_id", String.valueOf(stateId));
+        execute(Request.Method.GET,
+                null,
+                TAG,
+                buildGetURL(DOMINIO + GET_CITY, params),
                 callback);
     }
 
@@ -107,10 +135,10 @@ public class NetworkHelper {
                     }
                 });
 
-//        request.setRetryPolicy(new DefaultRetryPolicy(
-//                30000,
-//                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-//                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                30000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         request.setTag(tag);
         getRequestQueue().add(request);
 

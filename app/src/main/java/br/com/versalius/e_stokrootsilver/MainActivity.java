@@ -27,7 +27,7 @@ import br.com.versalius.e_stokrootsilver.activities.AccountSettingsActivity;
 import br.com.versalius.e_stokrootsilver.activities.LoginActivity;
 import br.com.versalius.e_stokrootsilver.activities.NewClientActivity;
 import br.com.versalius.e_stokrootsilver.activities.SellActivity;
-import br.com.versalius.e_stokrootsilver.activities.SellsListActivity;
+import br.com.versalius.e_stokrootsilver.activities.SellHistoryActivity;
 import br.com.versalius.e_stokrootsilver.model.Product;
 import br.com.versalius.e_stokrootsilver.model.User;
 import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         (findViewById(R.id.btSellList)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, SellsListActivity.class));
+                startActivity(new Intent(MainActivity.this, SellHistoryActivity.class));
             }
         });
 

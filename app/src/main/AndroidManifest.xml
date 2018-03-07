@@ -30,7 +30,7 @@
         </activity>
         <activity android:name=".activities.AccountSettingsActivity"/>
         <activity android:name=".activities.NewClientActivity"/>
-        <activity android:name=".activities.SellsListActivity"/>
+        <activity android:name=".activities.SellHistoryActivity"/>
         <activity android:name=".activities.SellActivity"/>
         <activity android:name=".SplashActivity">
             <intent-filter>

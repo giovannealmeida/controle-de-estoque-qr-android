@@ -43,7 +43,7 @@
                     android:imeOptions="actionNext"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
-                    android:text="jbsneto18@gmail.com" />
+                    android:text="jn18@hotmail.com.br" />
 
             </android.support.design.widget.TextInputLayout>
 

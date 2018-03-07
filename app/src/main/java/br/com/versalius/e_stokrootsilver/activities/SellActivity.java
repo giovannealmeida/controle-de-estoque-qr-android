@@ -89,6 +89,20 @@ public class SellActivity extends AppCompatActivity {
             }
         });
 
+        (findViewById(R.id.btCheckout)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /**
+                 * Todo: dados a serem enviados na confirmação da compra:
+                 *
+                 * CPF do cliente - @Nullable
+                 * Data
+                 * Array de ids de produtos (o webservice consulta os produtos, soma os preços e obtém o valor final da compra)
+                 * Valor total da compra [Opcional]
+                 */
+            }
+        });
+
         setupList(currentSell);
     }
 
