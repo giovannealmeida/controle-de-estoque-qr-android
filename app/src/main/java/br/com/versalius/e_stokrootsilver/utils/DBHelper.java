@@ -11,7 +11,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //Constantes do banco
     private static final String DB_NAME = "estok_root_silver_db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     //Constantes das tabelas
     public static final String TBL_SESSION = "session";
@@ -44,6 +44,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + TBL_SESSION + " (" +
                 " email TEXT NOT NULL," +
                 " password TEXT NOT NULL," +
+                " level_id INTEGER," +
                 " user_id INTEGER);");
     }
 

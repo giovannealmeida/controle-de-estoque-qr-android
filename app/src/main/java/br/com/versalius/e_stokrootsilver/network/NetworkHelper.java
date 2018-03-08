@@ -91,9 +91,10 @@ public class NetworkHelper {
                 callback);
     }
 
-    public void getProductByBarcode(String code, ResponseCallback callback) {
+    public void getProductByBarcode(String code, String userId, ResponseCallback callback) {
         HashMap<String, String> params = new HashMap<>();
         params.put("code", code);
+        params.put("user_id", userId);
         execute(Request.Method.GET,
                 null,
                 TAG,

@@ -51,7 +51,7 @@ public class Sell implements Serializable {
         double total = 0;
         if(products != null && !products.isEmpty()){
             for (Product p: products) {
-                total += p.getRetailPrice();
+                total += p.getValue();
             }
         }
         return total;

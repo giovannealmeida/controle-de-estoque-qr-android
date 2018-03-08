@@ -103,6 +103,7 @@ public class SessionHelper {
             values.put("user_id", user.getId());
             values.put("email", user.getEmail());
             values.put("password", user.getPassword());
+            values.put("level_id", user.getLevelId());
 
             helper.getDatabase().insert(DBHelper.TBL_SESSION, null, values);
 
@@ -112,7 +113,7 @@ public class SessionHelper {
 
             PreferencesHelper.getInstance(context).save(PreferencesHelper.USER_FIRST_NAME, user.getFirstName());
             PreferencesHelper.getInstance(context).save(PreferencesHelper.USER_LAST_NAME, user.getLastName());
-            PreferencesHelper.getInstance(context).save(PreferencesHelper.USER_ID, user.getId());
+            PreferencesHelper.getInstance(context).save(PreferencesHelper.USER_ID, user.getId()); //TODO: verificar necessidade já que getUserId() pega id do banco
             PreferencesHelper.getInstance(context).save(PreferencesHelper.USER_EMAIL, user.getEmail());
         } catch (Exception e) {
             e.printStackTrace();

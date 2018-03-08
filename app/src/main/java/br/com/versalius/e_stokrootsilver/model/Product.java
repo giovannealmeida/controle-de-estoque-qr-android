@@ -14,16 +14,17 @@ public class Product implements Serializable {
     private String code;
     private String name;
     private String description;
-    private int stockQuantity;
-    private double retailPrice;
-    private double wholesalePrice;
-    private String status;
+    private String weight;
+    private double value;
+    private String category;
+    private int amount;
 
-    /*TODO: remover já já*/
-    public Product(int id, String name, String sas, double retailPrice) {
+    /*TODO: remover já já
+    * Cria dummy para SellHistoryActivity*/
+    public Product(int id, String name, String sas, double value) {
         this.id = id;
         this.name = name;
-        this.retailPrice = retailPrice;
+        this.value = value;
     }
 
     public Product(JSONObject json) {
@@ -40,19 +41,19 @@ public class Product implements Serializable {
             if (json.has("description")) {
                 this.description = json.getString("description");
             }
-            if (json.has("quantity_in_stock")) {
-                this.stockQuantity = json.getInt("quantity_in_stock");
+            if (json.has("weight")) {
+                this.weight = json.getString("weight");
             }
-            if (json.has("wholesale_value")) {
+            if (json.has("category")) {
                 //O preço vem em String no fomato R$ 0,00
-                this.wholesalePrice = Double.valueOf(json.getString("wholesale_value").substring(3));
+                this.category = json.getString("category");
             }
-            if (json.has("retail_value")) {
+            if (json.has("amount")) {
+                this.amount = json.getInt("amount");
+            }
+            if (json.has("value")) {
                 //O preço vem em String no fomato R$ 0,00
-                this.retailPrice = Double.valueOf(json.getString("retail_value").substring(3));
-            }
-            if (json.has("status")) {
-                this.status = json.getString("status");
+                this.value = Double.valueOf(json.getString("value").substring(3));
             }
 
         } catch (JSONException e) {
@@ -76,19 +77,19 @@ public class Product implements Serializable {
         return description;
     }
 
-    public int getStockQuantity() {
-        return stockQuantity;
+    public String getWeight() {
+        return weight;
     }
 
-    public double getRetailPrice() {
-        return retailPrice;
+    public double getValue() {
+        return value;
     }
 
-    public double getWholesalePrice() {
-        return wholesalePrice;
+    public String getCategory() {
+        return category;
     }
 
-    public String getStatus() {
-        return status;
+    public int getAmount() {
+        return amount;
     }
 }

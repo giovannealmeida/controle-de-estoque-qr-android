@@ -20,6 +20,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -32,6 +33,7 @@ import br.com.versalius.e_stokrootsilver.model.Sell;
 import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
 import br.com.versalius.e_stokrootsilver.network.ResponseCallback;
 import br.com.versalius.e_stokrootsilver.utils.PreferencesHelper;
+import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
 
 public class SellActivity extends AppCompatActivity {
 
@@ -165,14 +167,11 @@ public class SellActivity extends AppCompatActivity {
 
     private void getProduct(String code) {
         progressBar.setVisibility(View.VISIBLE);
-        NetworkHelper.getInstance(this).getProductByBarcode(code, new ResponseCallback() {
+        NetworkHelper.getInstance(this).getProductByBarcode(code, new SessionHelper(this).getUserId(), new ResponseCallback() {
             @Override
             public void onSuccess(String jsonStringResponse) {
-                /* A resposta vem como um array de uma posição contendo o único produto.
-                TODO: Trocar a resposta por JSONObject.*/
                 try {
-                    JSONArray jsonArray = new JSONArray(jsonStringResponse);
-                    Product product = new Product(jsonArray.getJSONObject(0));
+                    Product product = new Product(new JSONObject(jsonStringResponse));
                     currentSell.addProduct(product);
                     if (currentSell.getProducts().size() > 1) {
                         ((TextView) findViewById(R.id.tvQtdItems)).setText(currentSell.getProducts().size() + " itens");

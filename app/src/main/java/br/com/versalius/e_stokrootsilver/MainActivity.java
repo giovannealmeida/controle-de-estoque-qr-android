@@ -22,6 +22,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import br.com.versalius.e_stokrootsilver.activities.AccountSettingsActivity;
 import br.com.versalius.e_stokrootsilver.activities.LoginActivity;
@@ -118,14 +119,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void getProduct(String code) {
         progressBar.setVisibility(View.VISIBLE);
-        NetworkHelper.getInstance(this).getProductByBarcode(code, new ResponseCallback() {
+        NetworkHelper.getInstance(this).getProductByBarcode(code, new SessionHelper(this).getUserId(), new ResponseCallback() {
             @Override
             public void onSuccess(String jsonStringResponse) {
-                /* A resposta vem como um array de uma posição contendo o único produto.
-                TODO: Trocar a resposta por JSONObject.*/
                 try {
-                    JSONArray jsonArray = new JSONArray(jsonStringResponse);
-                    Product product = new Product(jsonArray.getJSONObject(0));
+                    Product product = new Product(new JSONObject(jsonStringResponse));
                     startActivity(new Intent(MainActivity.this, SellActivity.class).putExtra("product", product));
                 } catch (JSONException e) {
                     Toast.makeText(MainActivity.this, "Falha ao obter dados do produto", Toast.LENGTH_LONG).show();

@@ -17,6 +17,7 @@ public class User implements Serializable{
     private String lastName;
     private String email;
     private String password;
+    private int levelId; //1 - ADM, 2 - vendedor
 
     public User(JSONObject json) {
         try {
@@ -33,6 +34,10 @@ public class User implements Serializable{
             }
             if(json.has("password")) {
                 this.password = json.optString("password", "");
+            }
+
+            if(json.has("level_id")) {
+                this.levelId = json.getInt("level_id");
             }
 
         } catch (JSONException e) {
@@ -58,5 +63,9 @@ public class User implements Serializable{
 
     public String getPassword() {
         return password;
+    }
+
+    public int getLevelId() {
+        return levelId;
     }
 }
