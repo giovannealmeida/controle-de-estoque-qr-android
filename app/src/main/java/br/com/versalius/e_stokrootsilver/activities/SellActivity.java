@@ -1,14 +1,24 @@
 package br.com.versalius.e_stokrootsilver.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,24 +32,31 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import br.com.versalius.e_stokrootsilver.MainActivity;
 import br.com.versalius.e_stokrootsilver.R;
 import br.com.versalius.e_stokrootsilver.adapters.SellAdapter;
 import br.com.versalius.e_stokrootsilver.model.Product;
 import br.com.versalius.e_stokrootsilver.model.Sell;
 import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
 import br.com.versalius.e_stokrootsilver.network.ResponseCallback;
+import br.com.versalius.e_stokrootsilver.utils.CustomSnackBar;
 import br.com.versalius.e_stokrootsilver.utils.PreferencesHelper;
 import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
 
 public class SellActivity extends AppCompatActivity {
 
+    private final int NEW_CLIENT_REQUEST_CODE = 1001;
     private Sell currentSell;
     private ProgressBar progressBar;
     private SellAdapter adapter;
+    private String clientId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,21 +108,234 @@ public class SellActivity extends AppCompatActivity {
             }
         });
 
+        (findViewById(R.id.tvAddClient)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAddClientDialog();
+            }
+        });
+
         (findViewById(R.id.btCheckout)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /**
-                 * Todo: dados a serem enviados na confirmação da compra:
-                 *
-                 * CPF do cliente - @Nullable
-                 * Data
-                 * Array de ids de produtos (o webservice consulta os produtos, soma os preços e obtém o valor final da compra)
-                 * Valor total da compra [Opcional]
-                 */
+
+                final HashMap<String, String> data = new HashMap<>();
+                data.put("client_id", clientId);
+                data.put("user_id", new SessionHelper(SellActivity.this).getUserId());
+                Collections.sort(currentSell.getProducts(), new Comparator<Product>() {
+                    @Override
+                    public int compare(Product p1, Product p2) {
+                        return p1.getId().compareTo(p2.getId());
+                    }
+                });
+
+                List<ProductItem> listProductItems = new ArrayList<>();
+                ProductItem productItem = new ProductItem();
+                productItem.product_id = currentSell.getProducts().get(0).getId();
+                productItem.amount = 0;
+                productItem.value = currentSell.getProducts().get(0).getValue();
+
+                listProductItems.add(productItem);
+
+                for (Product p : currentSell.getProducts()) {
+                    if (p.getId().equals(productItem.product_id)) {
+                        productItem.amount++;
+                    } else {
+                        productItem = new ProductItem();
+                        productItem.product_id = p.getId();
+                        productItem.amount = 1;
+                        productItem.value = p.getValue();
+                        listProductItems.add(productItem);
+                    }
+                }
+
+                data.put("products", new Gson().toJson(listProductItems));
+                if (clientId.isEmpty()) {
+                    new AlertDialog.Builder(SellActivity.this)
+                            .setTitle("Nenhum cliente adicionado")
+                            .setMessage("Deseja adicionar um cliente à compra?")
+                            .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    openAddClientDialog();
+                                }
+                            })
+                            .setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    doCheckout(data);
+                                }
+                            })
+                            .show();
+                } else {
+                    doCheckout(data);
+                }
             }
         });
 
         setupList(currentSell);
+    }
+
+    private void doCheckout(HashMap<String, String> data) {
+        progressBar.setVisibility(View.VISIBLE);
+        NetworkHelper.getInstance(SellActivity.this).checkout(data, new ResponseCallback() {
+            @Override
+            public void onSuccess(String jsonStringResponse) {
+                progressBar.setVisibility(View.GONE);
+                CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Compra realizada com sucesso", Snackbar.LENGTH_SHORT, CustomSnackBar.SUCCESS)
+                        .addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                            @Override
+                            public void onDismissed(Snackbar transientBottomBar, int event) {
+                                PreferencesHelper.getInstance(SellActivity.this).remove(PreferencesHelper.CURRENT_SELL_LIST);
+                                finish();
+                            }
+                        })
+                        .show();
+            }
+
+            @Override
+            public void onFail(VolleyError error) {
+                progressBar.setVisibility(View.GONE);
+                CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Falha ao fechar venda", Snackbar.LENGTH_LONG, CustomSnackBar.ERROR).show();
+            }
+        });
+    }
+
+    private void openAddClientDialog() {
+        /* Campo de CPF */
+        final EditText editText = new EditText(this);
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        InputFilter[] fArray = new InputFilter[1];
+        fArray[0] = new InputFilter.LengthFilter(11);
+        editText.setFilters(fArray);
+
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(100, 0, 100, 0);
+        lp.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+        lp.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+        editText.setLayoutParams(lp);
+
+        /* Progress bar */
+        final ProgressBar pb = new ProgressBar(this);
+        pb.setVisibility(View.GONE);
+        pb.setLayoutParams(lp);
+
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        RelativeLayout.LayoutParams rlParams = new RelativeLayout.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT);
+        relativeLayout.setLayoutParams(rlParams);
+        relativeLayout.addView(editText);
+        relativeLayout.addView(pb);
+
+        final AlertDialog alert = new AlertDialog.Builder(this)
+                .setTitle("Informe o CPF do cliente")
+                .setPositiveButton("Adicionar", null)
+                .setNeutralButton("Cancelar", null)
+                .create();
+
+        alert.setView(relativeLayout);
+
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button neutralButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEUTRAL);
+                Button positiveButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+
+                neutralButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        alert.dismiss();
+                    }
+                });
+
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        pb.setVisibility(View.VISIBLE);
+                        editText.setVisibility(View.GONE);
+
+                        final String cpf = editText.getText().toString().trim();
+                        if (cpf.isEmpty() || cpf.length() < 11 || !calcDigVerif(cpf.substring(0, 9)).equals(cpf.substring(9, 11))) {
+                            editText.setError("Insira um CPF válido");
+                            return;
+                        }
+
+                        NetworkHelper.getInstance(SellActivity.this).getClient(cpf, new ResponseCallback() {
+                            @Override
+                            public void onSuccess(String jsonStringResponse) {
+                                pb.setVisibility(View.GONE);
+                                editText.setVisibility(View.VISIBLE);
+                                if (jsonStringResponse.equals("false")) {
+                                    new AlertDialog.Builder(SellActivity.this)
+                                            .setTitle("Cliente não cadastado")
+                                            .setMessage("Deseja cadastrá-lo agora?")
+                                            .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    alert.dismiss();
+                                                    startActivityForResult(new Intent(SellActivity.this, NewClientActivity.class).putExtra("cpf",cpf), NEW_CLIENT_REQUEST_CODE);
+                                                }
+                                            })
+                                            .setNegativeButton("Não", null)
+                                            .show();
+                                } else {
+                                    try {
+                                        JSONObject jsonObject = new JSONObject(jsonStringResponse);
+                                        ((TextView) findViewById(R.id.tvClient)).setText("Cliente: " + jsonObject.getString("name"));
+                                        clientId = jsonObject.getString("id");
+                                        alert.dismiss();
+                                        CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), jsonObject.getString("name").split(" ")[0] + " adicionado", Snackbar.LENGTH_SHORT, CustomSnackBar.SUCCESS).show();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFail(VolleyError error) {
+                                pb.setVisibility(View.GONE);
+                                editText.setVisibility(View.VISIBLE);
+                                alert.dismiss();
+                                CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Falha ao adicionar cliente", Snackbar.LENGTH_LONG, CustomSnackBar.ERROR).show();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        alert.show();
+    }
+
+    /**
+     * Calcula o dígito verificador do CPF
+     *
+     * @param prefix - Prefixo do CPF (999.999.999)
+     * @return
+     */
+    private String calcDigVerif(String prefix) {
+        prefix = prefix.replace(".", "");
+        Integer primDig, segDig;
+        int soma = 0, peso = 10;
+        for (int i = 0; i < prefix.length(); i++)
+            soma += Integer.parseInt(prefix.substring(i, i + 1)) * peso--;
+
+        if (soma % 11 == 0 | soma % 11 == 1)
+            primDig = 0;
+        else
+            primDig = 11 - (soma % 11);
+
+        soma = 0;
+        peso = 11;
+        for (int i = 0; i < prefix.length(); i++)
+            soma += Integer.parseInt(prefix.substring(i, i + 1)) * peso--;
+
+        soma += primDig * 2;
+        if (soma % 11 == 0 | soma % 11 == 1)
+            segDig = 0;
+        else
+            segDig = 11 - (soma % 11);
+
+        return primDig.toString() + segDig.toString();
     }
 
     private void saveCurrentSell() {
@@ -153,15 +383,26 @@ public class SellActivity extends AppCompatActivity {
     // Get the results:
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() == null) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == IntentIntegrator.REQUEST_CODE) {
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (result != null) {
+                if (result.getContents() == null) {
 //                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
-            } else {
-                getProduct(result.getContents());
+                } else {
+                    getProduct(result.getContents());
+                }
             }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
+        } else if (requestCode == NEW_CLIENT_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras();
+                if (extras != null) {
+                    clientId = extras.getString("client_id");
+                    ((TextView) findViewById(R.id.tvClient)).setText("Cliente: " + extras.getString("name"));
+                    CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), extras.getString("name").split(" ")[0] + " adicionado", Snackbar.LENGTH_SHORT, CustomSnackBar.SUCCESS).show();
+                }
+            }
         }
     }
 
@@ -200,4 +441,9 @@ public class SellActivity extends AppCompatActivity {
         });
     }
 
+    private class ProductItem {
+        public int product_id;
+        public int amount;
+        public double value;
+    }
 }

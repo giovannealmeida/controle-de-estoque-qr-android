@@ -41,6 +41,7 @@ public class SellAdapter extends RecyclerView.Adapter<SellAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.tvName.setText(list.get(position).getName());
+        holder.tvName.setSelected(true);
         holder.tvPrice.setText("R$ " + list.get(position).getValue());
     }
 

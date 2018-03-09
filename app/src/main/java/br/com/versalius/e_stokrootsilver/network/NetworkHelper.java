@@ -37,6 +37,8 @@ public class NetworkHelper {
     private final String GET_CITY = API + "Cities_controller";
     private final String REGISTER_CLIENT = API + "Cliente_controller/register";
     private final String CHECK_CPF = API + "Cliente_controller/client_exists";
+    private final String GET_CLIENT = API + "Cliente_controller/client";
+    private final String CHECKOUT = API + "Venda_controller";
 
     private NetworkHelper(Context context) {
         this.context = context;
@@ -71,6 +73,10 @@ public class NetworkHelper {
         execute(Request.Method.POST, params, TAG, DOMINIO + REGISTER_CLIENT, callback);
     }
 
+    public void checkout(HashMap<String, String> params, ResponseCallback callback) {
+        execute(Request.Method.POST, params, TAG, DOMINIO + CHECKOUT, callback);
+    }
+
     public void getUserById(String id, ResponseCallback callback) {
         HashMap<String, String> params = new HashMap<>();
         params.put("id", id);
@@ -88,6 +94,16 @@ public class NetworkHelper {
                 null,
                 TAG,
                 buildGetURL(DOMINIO + CHECK_CPF, params),
+                callback);
+    }
+
+    public void getClient(String cpf, ResponseCallback callback) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("cpf", cpf);
+        execute(Request.Method.GET,
+                null,
+                TAG,
+                buildGetURL(DOMINIO + GET_CLIENT, params),
                 callback);
     }
 

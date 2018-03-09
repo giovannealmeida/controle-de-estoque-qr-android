@@ -56,10 +56,6 @@ public class CustomRequest extends Request<String> {
             String jsonString = new String(response.data,
                     HttpHeaderParser.parseCharset(response.headers));
 
-//            /* Não sei se o que vem é JSONArray ou JSONObject. Encapsula num JSONObject e deixa o destinatário decidir o que fazer */
-//            JSONObject jsonObject = new JSONObject();
-//            jsonObject.put("data",jsonString);
-
             return Response.success(jsonString,
                     HttpHeaderParser.parseCacheHeaders(response));
         } catch (UnsupportedEncodingException e) {

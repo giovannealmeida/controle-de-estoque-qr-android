@@ -50,7 +50,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:clipToPadding="false"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/textView"
@@ -108,10 +109,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/rounded_scan_button"
-                android:drawableLeft="@drawable/qrcode_scan"
-                android:drawableStart="@drawable/qrcode_scan"
+                android:drawableLeft="@drawable/barcode_scan"
+                android:drawableStart="@drawable/barcode_scan"
                 android:padding="12dp"
-                android:text="Leitor de Qr Code"
+                android:text="Ler código de barras"
                 android:textColor="@android:color/white" />
 
             <android.support.v7.widget.AppCompatButton
@@ -123,7 +124,7 @@
                 android:drawableLeft="@drawable/ic_person_add"
                 android:drawableStart="@drawable/ic_person_add"
                 android:padding="12dp"
-                android:text="Novo Usuário"
+                android:text="Novo Cliente"
                 android:textColor="@color/bt_new_client" />
 
             <android.support.v7.widget.AppCompatButton
@@ -135,7 +136,7 @@
                 android:drawableLeft="@drawable/ic_shopping_cart"
                 android:drawableStart="@drawable/ic_shopping_cart"
                 android:padding="12dp"
-                android:text="Lista de vendas"
+                android:text="Histórico de vendas"
                 android:textColor="@color/bt_sell_list" />
 
         </LinearLayout>

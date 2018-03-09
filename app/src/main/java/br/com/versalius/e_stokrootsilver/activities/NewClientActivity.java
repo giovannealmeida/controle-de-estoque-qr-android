@@ -1,10 +1,10 @@
 package br.com.versalius.e_stokrootsilver.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.BaseTransientBottomBar;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
@@ -52,6 +52,8 @@ public class NewClientActivity extends AppCompatActivity implements View.OnFocus
     private ProgressBar progressBar;
     private HashMap<String, String> newClientData;
     private boolean isCPFOk = false;
+    private boolean isReadyForSignUp;
+    private boolean isCheckingCPF;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +68,15 @@ public class NewClientActivity extends AppCompatActivity implements View.OnFocus
 
         etName = (TextInputEditText) findViewById(R.id.etName);
         etName.setOnFocusChangeListener(this);
-        ;
+
         etCPF = (TextInputEditText) findViewById(R.id.etCpf);
         etCPF.setOnFocusChangeListener(this);
+
+        if(getIntent().getExtras() != null){
+            etCPF.setText(getIntent().getExtras().getString("cpf"));
+        }
+
+
         etEmail = (TextInputEditText) findViewById(R.id.etEmail);
         etEmail.setOnFocusChangeListener(this);
         etPhone = (TextInputEditText) findViewById(R.id.etPhone);
@@ -136,6 +144,7 @@ public class NewClientActivity extends AppCompatActivity implements View.OnFocus
         findViewById(R.id.btSingup).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isReadyForSignUp = true;
                 progressBar.setVisibility(View.VISIBLE);
                 if (isFormValid()) {
                     newClientData = new HashMap<>();
@@ -149,19 +158,43 @@ public class NewClientActivity extends AppCompatActivity implements View.OnFocus
                     }
                     newClientData.put("cpf", etCPF.getText().toString());
 
+                    /* Se estiver chegando CPF, espera a verificação. Assim que o CPF for validado o cadastro continua*/
+                    if(isCheckingCPF){
+                        return;
+                    }
+
                     NetworkHelper.getInstance(NewClientActivity.this).registerClient(newClientData, new ResponseCallback() {
                         @Override
                         public void onSuccess(String jsonStringResponse) {
                             progressBar.setVisibility(View.GONE);
-                            Snackbar snackbar = CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Cliente cadastrado com sucesso", Snackbar.LENGTH_LONG, CustomSnackBar.SUCCESS);
-                            snackbar.addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                                @Override
-                                public void onDismissed(Snackbar transientBottomBar, int event) {
-                                    super.onDismissed(transientBottomBar, event);
-                                    finish();
+                            try {
+                                final JSONObject jsonObject = new JSONObject(jsonStringResponse);
+
+                                if (!jsonObject.getBoolean("status")) {
+                                    CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Falha ao cadastrar cliente", Snackbar.LENGTH_LONG, CustomSnackBar.ERROR).show();
+                                } else {
+                                    Snackbar snackbar = CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Cliente cadastrado com sucesso", Snackbar.LENGTH_LONG, CustomSnackBar.SUCCESS);
+                                    snackbar.addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                                        @Override
+                                        public void onDismissed(Snackbar transientBottomBar, int event) {
+                                            super.onDismissed(transientBottomBar, event);
+
+                                            try {
+                                                setResult(RESULT_OK, new Intent()
+                                                        .putExtra("client_id", jsonObject.getString("client_id"))
+                                                        .putExtra("name", jsonObject.getString("name")));
+                                                finish();
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                        }
+                                    });
+                                    snackbar.show();
                                 }
-                            });
-                            snackbar.show();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
 
                         @Override
@@ -187,11 +220,12 @@ public class NewClientActivity extends AppCompatActivity implements View.OnFocus
             focusRequested = etName;
         }
 
-        if(!isCPFOk) {
+        if (!isCPFOk) {
             if (etCPF.getText().toString().isEmpty()) {
                 etCPF.setError("Insira um CPF válido");
                 focusRequested = etCPF;
             } else {
+                isCheckingCPF = true;
                 checkCPF();
             }
         }
@@ -258,6 +292,7 @@ public class NewClientActivity extends AppCompatActivity implements View.OnFocus
         NetworkHelper.getInstance(this).cpfExists(cpf, new ResponseCallback() {
             @Override
             public void onSuccess(String jsonStringResponse) {
+                isCheckingCPF = false;
                 findViewById(R.id.ivCpfCheck).setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
                 try {
@@ -271,6 +306,10 @@ public class NewClientActivity extends AppCompatActivity implements View.OnFocus
                         isCPFOk = true;
                         ((ImageView) findViewById(R.id.ivCpfCheck)).setImageDrawable(ContextCompat.getDrawable(NewClientActivity.this, R.drawable.ic_check_circle));
                         ((ImageView) findViewById(R.id.ivCpfCheck)).setColorFilter(Color.argb(255, 0, 192, 96));
+
+                        if(isReadyForSignUp){
+                            findViewById(R.id.btSingup).performClick();
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

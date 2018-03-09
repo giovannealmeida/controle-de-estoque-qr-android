@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 
 public class Product implements Serializable {
-    private int id;
+    private Integer id;
     private String code;
     private String name;
     private String description;
@@ -61,7 +61,7 @@ public class Product implements Serializable {
         }
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 

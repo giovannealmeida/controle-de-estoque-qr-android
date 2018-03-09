@@ -90,6 +90,7 @@
     <string name="pref_title_display_cpf">CPF</string>
     <string name="dialog_action_yes">Sim</string>
     <string name="dialog_action_no">Não</string>
+    <string name="adicionar_cliente"><b><u>+ Adicionar cliente</u></b></string>
 
     <string-array name="array_states">
         <item>Selecione um estado…</item> <!-- Valor default -->
