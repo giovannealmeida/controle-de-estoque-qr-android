@@ -19,7 +19,7 @@ public class PreferencesHelper {
     public static final String USER_LAST_NAME = "user_last_name";
     public static final String USER_ID = "user_id";
     public static final String USER_EMAIL = "user_email";
-    public static final String CURRENT_SELL_LIST = "current_sell_list";
+    public static final String CURRENT_SELL_LIST = "current_sell_list"; //Sempre usado com o id do usuário dono da venda 'current_sell_list_57'
 
     private static PreferencesHelper instance;
     private SharedPreferences sharedPreferences;

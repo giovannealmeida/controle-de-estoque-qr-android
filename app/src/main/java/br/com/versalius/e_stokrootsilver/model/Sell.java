@@ -11,16 +11,22 @@ import java.util.List;
  */
 
 public class Sell implements Serializable {
+    public final static int TYPE_WHOLESALE = 1;
+    public final static int TYPE_RETAIL = 2;
+    public final static int TYPE_WHOLESALE_AND_RETAIL = 3;
+
     private long id;
     private List<Product> products;
     private String client;
     private Calendar date;
+    private int saleType;
 
-    public Sell(long id, List<Product> products, String client, Calendar date) {
+    public Sell(long id, List<Product> products, String client, Calendar date, int saleType) {
         this.id = id;
         this.products = products;
         this.client = client;
         this.date = date;
+        this.saleType = saleType;
     }
 
     public Sell() {
@@ -70,5 +76,13 @@ public class Sell implements Serializable {
 
     public void setClient(String client) {
         this.client = client;
+    }
+
+    public void setSaleType(int saleType) {
+        this.saleType = saleType;
+    }
+
+    public int getSaleType() {
+        return saleType;
     }
 }

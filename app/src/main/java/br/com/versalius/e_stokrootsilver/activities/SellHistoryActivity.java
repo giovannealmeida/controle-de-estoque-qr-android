@@ -40,19 +40,21 @@ public class SellHistoryActivity extends AppCompatActivity {
 
     private List<Sell> getDummyList(){
         List<Product> products = new ArrayList<>();
-        products.add(new Product(1, "Sapato A", "0.500 kg", 99.9));
-        products.add(new Product(1, "Sapato B", "0.250 kg", 74.9));
-        products.add(new Product(1, "Sapato C", "0.330 kg", 199.9));
-        products.add(new Product(1, "Boné", "0.500 kg", 59.9));
+        products.add(new Product(1, "Dummy Sapato A", "0.500 kg", 99.9));
+        products.add(new Product(2, "Dummy Sapato B", "0.250 kg", 74.9));
+        products.add(new Product(3, "Dummy Sapato C", "0.330 kg", 199.9));
+        products.add(new Product(4, "Dummy Boné", "0.500 kg", 59.9));
+        products.add(new Product(4, "Dummy Boné", "0.500 kg", 59.9));
+        products.add(new Product(4, "Dummy Boné", "0.500 kg", 59.9));
 
         List<Sell> sells = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2017,10,11);
-        sells.add(new Sell(1, products, "Cliente 1", calendar));
-        sells.add(new Sell(1, products, "Cliente 2", calendar));
-        sells.add(new Sell(1, products, "Cliente 3", calendar));
-        sells.add(new Sell(1, products, "Cliente 4", calendar));
-        sells.add(new Sell(1, products, "Cliente 5", calendar));
+        sells.add(new Sell(1, products, "Dummy Cliente 1", calendar,2));
+        sells.add(new Sell(1, products, "Dummy Cliente 2", calendar,2));
+        sells.add(new Sell(1, products, "Dummy Cliente 3", calendar,2));
+        sells.add(new Sell(1, products, "Dummy Cliente 4", calendar,2));
+        sells.add(new Sell(1, products, "Dummy Cliente 5", calendar,2));
 
         return sells;
     }

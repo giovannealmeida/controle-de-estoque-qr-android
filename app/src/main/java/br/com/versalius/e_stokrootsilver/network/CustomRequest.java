@@ -21,10 +21,12 @@ public class CustomRequest extends Request<String> {
 
     private Listener<String> listener;
     private Map<String, String> params;
+    private String APIKEY;
 
-    public CustomRequest(int method, String url, Map<String, String> params,
+    public CustomRequest(String APIKEY, int method, String url, Map<String, String> params,
                          Listener<String> reponseListener, ErrorListener errorListener) {
         super(method, url, errorListener);
+        this.APIKEY = APIKEY;
         this.listener = reponseListener;
         this.params = params;
     }
@@ -44,9 +46,12 @@ public class CustomRequest extends Request<String> {
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
         HashMap<String, String> params = new HashMap<String, String>();
-        String creds = String.format("%s:%s","admin","1234");
-        String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
-        params.put("Authorization", auth);
+//        String creds = String.format("%s:%s","admin","1234");
+//        String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
+//        params.put("Authorization", auth);
+        if(APIKEY != null) {
+            params.put("X-API-KEY", APIKEY);
+        }
         return params;
     }
 

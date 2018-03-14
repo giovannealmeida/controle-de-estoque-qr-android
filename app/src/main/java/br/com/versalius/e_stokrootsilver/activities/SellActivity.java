@@ -11,16 +11,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
@@ -28,7 +25,6 @@ import com.google.gson.reflect.TypeToken;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,7 +34,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import br.com.versalius.e_stokrootsilver.R;
 import br.com.versalius.e_stokrootsilver.adapters.SellAdapter;
@@ -74,12 +69,16 @@ public class SellActivity extends AppCompatActivity {
             if (currentSell != null) {
                 /* Se tiver, carrega*/
                 getSupportActionBar().setTitle("Histórico de venda");
+                findViewById(R.id.btScan).setVisibility(View.GONE);
+                findViewById(R.id.btCheckout).setVisibility(View.GONE);
             } else {
                 /*Se não tiver uma venda, só pode ter um produto. Sendo assim, é criada uma nova venda ou carregada uma venda existente*/
                 loadCurrentSell();
                 getSupportActionBar().setTitle("Nova venda");
 
                 Product product = (Product) getIntent().getExtras().getSerializable("product");
+                currentSell.setSaleType(getIntent().getExtras().getInt("type_sale_id"));
+                ;
                 if (product != null) {
                     currentSell.addProduct(product);
                     saveCurrentSell();
@@ -93,6 +92,7 @@ public class SellActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Venda pendente");
         }
 
+        ((TextView) findViewById(R.id.tvTypeSale)).setText("Tipo: " + (currentSell.getSaleType() == Sell.TYPE_RETAIL ? "Varejo" : "Atacado"));
         ((TextView) findViewById(R.id.tvClient)).setText("Cliente: " + currentSell.getClient());
         ((TextView) findViewById(R.id.tvDate)).setText("Data: " + currentSell.getFormattedDate());
         if (currentSell.getProducts().size() > 1) {
@@ -120,8 +120,9 @@ public class SellActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 final HashMap<String, String> data = new HashMap<>();
+                data.put("type_sale_id", String.valueOf(currentSell.getSaleType()));
                 data.put("client_id", clientId);
-                data.put("user_id", new SessionHelper(SellActivity.this).getUserId());
+                data.put("user_id", new SessionHelper(SellActivity.this).getUserId().toString());
                 Collections.sort(currentSell.getProducts(), new Comparator<Product>() {
                     @Override
                     public int compare(Product p1, Product p2) {
@@ -186,7 +187,7 @@ public class SellActivity extends AppCompatActivity {
                         .addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
                             @Override
                             public void onDismissed(Snackbar transientBottomBar, int event) {
-                                PreferencesHelper.getInstance(SellActivity.this).remove(PreferencesHelper.CURRENT_SELL_LIST);
+                                PreferencesHelper.getInstance(SellActivity.this).remove(PreferencesHelper.CURRENT_SELL_LIST + "_" + new SessionHelper(SellActivity.this).getUserId());
                                 finish();
                             }
                         })
@@ -272,7 +273,7 @@ public class SellActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     alert.dismiss();
-                                                    startActivityForResult(new Intent(SellActivity.this, NewClientActivity.class).putExtra("cpf",cpf), NEW_CLIENT_REQUEST_CODE);
+                                                    startActivityForResult(new Intent(SellActivity.this, NewClientActivity.class).putExtra("cpf", cpf), NEW_CLIENT_REQUEST_CODE);
                                                 }
                                             })
                                             .setNegativeButton("Não", null)
@@ -343,7 +344,7 @@ public class SellActivity extends AppCompatActivity {
             Gson gson = new Gson();
             String sellJson = gson.toJson(currentSell, new TypeToken<Sell>() {
             }.getType());
-            PreferencesHelper.getInstance(this).save(PreferencesHelper.CURRENT_SELL_LIST, sellJson);
+            PreferencesHelper.getInstance(this).save(PreferencesHelper.CURRENT_SELL_LIST + "_" + new SessionHelper(this).getUserId(), sellJson);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -351,7 +352,7 @@ public class SellActivity extends AppCompatActivity {
 
     private void loadCurrentSell() {
         Gson gson = new Gson();
-        String sellJson = PreferencesHelper.getInstance(this).load(PreferencesHelper.CURRENT_SELL_LIST);
+        String sellJson = PreferencesHelper.getInstance(this).load(PreferencesHelper.CURRENT_SELL_LIST + "_" + new SessionHelper(this).getUserId());
         if (sellJson.isEmpty()) {
             currentSell = new Sell();
             currentSell.setDate(Calendar.getInstance());
@@ -408,26 +409,34 @@ public class SellActivity extends AppCompatActivity {
 
     private void getProduct(String code) {
         progressBar.setVisibility(View.VISIBLE);
-        NetworkHelper.getInstance(this).getProductByBarcode(code, new SessionHelper(this).getUserId(), new ResponseCallback() {
+        NetworkHelper.getInstance(this).getProductByBarcode(code, new SessionHelper(this).getUserId().toString(), String.valueOf(currentSell.getSaleType()), new ResponseCallback() {
             @Override
             public void onSuccess(String jsonStringResponse) {
                 try {
-                    Product product = new Product(new JSONObject(jsonStringResponse));
-                    currentSell.addProduct(product);
-                    if (currentSell.getProducts().size() > 1) {
-                        ((TextView) findViewById(R.id.tvQtdItems)).setText(currentSell.getProducts().size() + " itens");
+                    JSONObject jsonObject = new JSONObject(jsonStringResponse);
+
+                    if (jsonObject.getBoolean("status")) {
+
+                        Product product = new Product(jsonObject.getJSONObject("data"));
+                        currentSell.addProduct(product);
+                        if (currentSell.getProducts().size() > 1) {
+                            ((TextView) findViewById(R.id.tvQtdItems)).setText(currentSell.getProducts().size() + " itens");
+                        } else {
+                            ((TextView) findViewById(R.id.tvQtdItems)).setText(currentSell.getProducts().size() + " item");
+                        }
+                        if (adapter != null) {
+                            adapter.notifyDataSetChanged();
+                        } else {
+                            setupList(currentSell);
+                        }
+                        ((TextView) findViewById(R.id.tvTotalPrice)).setText("Total: " + currentSell.getTotalPrice() + "");
+                        saveCurrentSell();
                     } else {
-                        ((TextView) findViewById(R.id.tvQtdItems)).setText(currentSell.getProducts().size() + " item");
+                        CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), jsonObject.getString("message"), Snackbar.LENGTH_SHORT, CustomSnackBar.ERROR).show();
+                        progressBar.setVisibility(View.GONE);
                     }
-                    if (adapter != null) {
-                        adapter.notifyDataSetChanged();
-                    } else {
-                        setupList(currentSell);
-                    }
-                    ((TextView) findViewById(R.id.tvTotalPrice)).setText("Total: " + currentSell.getTotalPrice() + "");
-                    saveCurrentSell();
                 } catch (JSONException e) {
-                    Toast.makeText(SellActivity.this, "Falha ao obter dados do produto", Toast.LENGTH_LONG).show();
+                    CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Falha ao obter dados do produto", Snackbar.LENGTH_SHORT, CustomSnackBar.ERROR).show();
                     e.printStackTrace();
                 }
                 progressBar.setVisibility(View.GONE);
@@ -435,7 +444,7 @@ public class SellActivity extends AppCompatActivity {
 
             @Override
             public void onFail(VolleyError error) {
-                Toast.makeText(SellActivity.this, "Falha ao se conectar com o servidor. Tente mais tarde.", Toast.LENGTH_LONG).show();
+                CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Falha ao se conectar com o servidor", Snackbar.LENGTH_SHORT, CustomSnackBar.ERROR).show();
                 progressBar.setVisibility(View.GONE);
             }
         });

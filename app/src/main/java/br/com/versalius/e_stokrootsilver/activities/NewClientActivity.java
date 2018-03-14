@@ -76,7 +76,6 @@ public class NewClientActivity extends AppCompatActivity implements View.OnFocus
             etCPF.setText(getIntent().getExtras().getString("cpf"));
         }
 
-
         etEmail = (TextInputEditText) findViewById(R.id.etEmail);
         etEmail.setOnFocusChangeListener(this);
         etPhone = (TextInputEditText) findViewById(R.id.etPhone);

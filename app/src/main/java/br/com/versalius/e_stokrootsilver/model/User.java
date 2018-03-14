@@ -4,7 +4,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.util.Calendar;
 
 /**
  * Created by Giovanne on 23/10/2017.
@@ -18,6 +17,7 @@ public class User implements Serializable{
     private String email;
     private String password;
     private int levelId; //1 - ADM, 2 - vendedor
+    private int typeSaleId; //1 - Atacado, 2 - Varejo, 3 - Ambos
 
     public User(JSONObject json) {
         try {
@@ -32,12 +32,17 @@ public class User implements Serializable{
             if(json.has("email")) {
                 this.email = json.optString("email", "");
             }
+
             if(json.has("password")) {
                 this.password = json.optString("password", "");
             }
 
             if(json.has("level_id")) {
                 this.levelId = json.getInt("level_id");
+            }
+
+            if(json.has("type_sale_id")) {
+                this.typeSaleId = json.getInt("type_sale_id");
             }
 
         } catch (JSONException e) {
@@ -67,5 +72,9 @@ public class User implements Serializable{
 
     public int getLevelId() {
         return levelId;
+    }
+
+    public int getTypeSaleId() {
+        return typeSaleId;
     }
 }

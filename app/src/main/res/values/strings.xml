@@ -131,4 +131,12 @@
         <item>Cidade 5</item>
         <item>Cidade 6</item>
     </string-array>
+
+    <string-array name="test_user_emails">
+        <item>Selecione um e-mail</item> <!-- Valor default -->
+        <item>adm@rootsilver.com.br</item>
+        <item>abarbieri.it@gmail.com</item>
+        <item>jbsneto18@gmail.com</item>
+        <item>giovanne.almeida91@gmail.com</item>
+    </string-array>
 </resources>

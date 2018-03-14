@@ -3,6 +3,7 @@ package br.com.versalius.e_stokrootsilver.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 
@@ -10,18 +11,29 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
 import android.text.TextUtils;
+import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import br.com.versalius.e_stokrootsilver.MainActivity;
 import br.com.versalius.e_stokrootsilver.R;
@@ -49,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
 
         tvMessage = (TextView) findViewById(R.id.tvMessage);
 
-        if(getIntent().getStringExtra("message")!= null) {
+        if (getIntent().getStringExtra("message") != null) {
             tvMessage.setText(getIntent().getStringExtra("message"));
         }
 
@@ -78,6 +90,30 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        /*ToDo: REMOVER ESSA DESGRAÇA*/
+        final Spinner spTestEmails = (Spinner) findViewById(R.id.spEmails);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.test_user_emails, android.R.layout.simple_spinner_item);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spTestEmails.setAdapter(adapter);
+        spTestEmails.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position > 0) {
+                    mEmailView.setText(spTestEmails.getSelectedItem().toString());
+                } else {
+                    mEmailView.setText("");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     /**
@@ -143,6 +179,13 @@ public class LoginActivity extends AppCompatActivity {
      * Envia usuário e senha para o webservice e tenta fazer login
      */
     private void doLogin(String email, String password) {
+        /* Esconde o teclado */
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+
         showProgress(true);
 
         NetworkHelper.getInstance(this).doLogin(email, password, new ResponseCallback() {
@@ -150,12 +193,12 @@ public class LoginActivity extends AppCompatActivity {
             public void onSuccess(String jsonStringResponse) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonStringResponse);
-                    if(jsonObject.getBoolean("status")){
+                    if (jsonObject.getBoolean("status")) {
                         User user = new User(jsonObject.getJSONObject("data").getJSONObject("userData"));
                         Bundle bundle = new Bundle();
-                        bundle.putSerializable("user",user);
+                        bundle.putSerializable("user", user);
 
-                        new SessionHelper(LoginActivity.this).saveUser(user);
+                        new SessionHelper(LoginActivity.this).saveUser(user, jsonObject.getJSONObject("data").getString("key"));
 
                         startActivity(new Intent(LoginActivity.this, MainActivity.class).putExtras(bundle));
                         finish();

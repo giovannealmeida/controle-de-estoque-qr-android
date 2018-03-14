@@ -3,24 +3,28 @@ package br.com.versalius.e_stokrootsilver;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,9 +34,11 @@ import br.com.versalius.e_stokrootsilver.activities.NewClientActivity;
 import br.com.versalius.e_stokrootsilver.activities.SellActivity;
 import br.com.versalius.e_stokrootsilver.activities.SellHistoryActivity;
 import br.com.versalius.e_stokrootsilver.model.Product;
+import br.com.versalius.e_stokrootsilver.model.Sell;
 import br.com.versalius.e_stokrootsilver.model.User;
 import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
 import br.com.versalius.e_stokrootsilver.network.ResponseCallback;
+import br.com.versalius.e_stokrootsilver.utils.CustomSnackBar;
 import br.com.versalius.e_stokrootsilver.utils.PreferencesHelper;
 import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
 
@@ -40,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
     private View llPendingSellOptions;
+    private int typeSaleId = 0; //Determina se a venda é atacado ou varejo
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +70,50 @@ public class MainActivity extends AppCompatActivity {
         (findViewById(R.id.btScan)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new IntentIntegrator(MainActivity.this).setPrompt("Alinhe o leito com o código de barras do produto.").initiateScan(); // `this` is the current Activity
+                switch (new SessionHelper(MainActivity.this).getUserTypeSaleId()) {
+                    case Sell.TYPE_WHOLESALE_AND_RETAIL:
+                        final RadioGroup rgSaleType = new RadioGroup(MainActivity.this);
+                        final RadioButton rbRetail = new RadioButton(MainActivity.this);
+                        rbRetail.setText("Varejo");
+                        final RadioButton rbWholesale = new RadioButton(MainActivity.this);
+                        rbWholesale.setText("Atacado");
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT);
+                        layoutParams.setMargins(40, 40, 0, 0);
+                        rgSaleType.addView(rbRetail, layoutParams);
+                        layoutParams.setMargins(40, 0, 0, 0);
+                        rgSaleType.addView(rbWholesale, layoutParams);
+                        rgSaleType.check(rbRetail.getId());
+
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("Qual o tipo da venda?")
+                                .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (rgSaleType.getCheckedRadioButtonId() == rbRetail.getId()) {
+                                            typeSaleId = 2;
+                                        } else if (rgSaleType.getCheckedRadioButtonId() == rbWholesale.getId()) {
+                                            typeSaleId = 1;
+                                        }
+                                        new IntentIntegrator(MainActivity.this).setPrompt("Alinhe o leitor com o código de barras do produto.").initiateScan(); // `this` is the current Activity
+                                    }
+                                })
+                                .setNegativeButton("Cancelar", null)
+                                .setCancelable(false)
+                                .setView(rgSaleType)
+                                .show();
+                        break;
+                    case Sell.TYPE_RETAIL:
+                        typeSaleId = 2;
+                        break;
+                    case Sell.TYPE_WHOLESALE:
+                        typeSaleId = 1;
+                        break;
+                }
+
+                if(typeSaleId != 0){
+                    new IntentIntegrator(MainActivity.this).setPrompt("Alinhe o leitor com o código de barras do produto.").initiateScan(); // `this` is the current Activity
+                }
+
             }
         });
 
@@ -98,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean existsPendingSell() {
-        return !PreferencesHelper.getInstance(this).load(PreferencesHelper.CURRENT_SELL_LIST).isEmpty();
+        return !PreferencesHelper.getInstance(this).load(PreferencesHelper.CURRENT_SELL_LIST+"_"+new SessionHelper(this).getUserId()).isEmpty();
     }
 
     // Get the results:
@@ -109,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
             if (result.getContents() == null) {
 //                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
-
                 getProduct(result.getContents());
             }
         } else {
@@ -119,14 +168,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void getProduct(String code) {
         progressBar.setVisibility(View.VISIBLE);
-        NetworkHelper.getInstance(this).getProductByBarcode(code, new SessionHelper(this).getUserId(), new ResponseCallback() {
+        String userId = new SessionHelper(this).getUserId().toString();
+        NetworkHelper.getInstance(this).getProductByBarcode(code, userId != null ? userId : "", String.valueOf(typeSaleId), new ResponseCallback() {
             @Override
             public void onSuccess(String jsonStringResponse) {
                 try {
-                    Product product = new Product(new JSONObject(jsonStringResponse));
-                    startActivity(new Intent(MainActivity.this, SellActivity.class).putExtra("product", product));
+                    JSONObject jsonObject = new JSONObject(jsonStringResponse);
+                    if (jsonObject.getBoolean("status")) {
+                        Product product = new Product(jsonObject.getJSONObject("data"));
+                        startActivity(new Intent(MainActivity.this, SellActivity.class).putExtra("product", product).putExtra("type_sale_id", typeSaleId));
+                        typeSaleId = 0;
+                    } else {
+                        CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), jsonObject.getString("message"), Snackbar.LENGTH_SHORT, CustomSnackBar.ERROR).show();
+                        progressBar.setVisibility(View.GONE);
+                    }
                 } catch (JSONException e) {
-                    Toast.makeText(MainActivity.this, "Falha ao obter dados do produto", Toast.LENGTH_LONG).show();
+                    CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Falha ao obter dados do produto", Snackbar.LENGTH_SHORT, CustomSnackBar.ERROR).show();
                     e.printStackTrace();
                 }
                 progressBar.setVisibility(View.GONE);
@@ -134,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFail(VolleyError error) {
-                Toast.makeText(MainActivity.this, "Falha ao se conectar com o servidor. Tente mais tarde.", Toast.LENGTH_LONG).show();
+                CustomSnackBar.make((RelativeLayout) findViewById(R.id.parentView), "Falha ao se conectar com o servidor", Snackbar.LENGTH_SHORT, CustomSnackBar.ERROR).show();
                 progressBar.setVisibility(View.GONE);
             }
         });
@@ -144,8 +201,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         if (existsPendingSell()) {
             llPendingSellOptions.setVisibility(View.VISIBLE);
+            (findViewById(R.id.btScan)).setVisibility(View.GONE);
         } else {
             llPendingSellOptions.setVisibility(View.GONE);
+            (findViewById(R.id.btScan)).setVisibility(View.VISIBLE);
         }
         super.onResume();
     }
@@ -190,8 +249,8 @@ public class MainActivity extends AppCompatActivity {
                     .setPositiveButton(getString(R.string.dialog_action_yes),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    PreferencesHelper.getInstance(getActivity()).remove(PreferencesHelper.CURRENT_SELL_LIST);
-                                    ((MainActivity)getActivity()).onResume();
+                                    PreferencesHelper.getInstance(getActivity()).remove(PreferencesHelper.CURRENT_SELL_LIST+"_"+new SessionHelper(getActivity()).getUserId());
+                                    ((MainActivity) getActivity()).onResume();
 //                                            .findViewById(R.id.llPendingSellOptions).setVisibility(View.GONE);
                                 }
                             }

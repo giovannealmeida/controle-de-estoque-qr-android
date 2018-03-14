@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
+
 /**
  * Created by Giovanne on 28/06/2016.
  */
@@ -26,7 +28,7 @@ public class NetworkHelper {
     private static Context context;
     private RequestQueue requestQueue;
 
-    public static final String DOMINIO = "http://192.168.1.104/controle-de-estoque-qr-web/"; //local
+    public static final String DOMINIO = "http://192.168.1.107/controle-de-estoque-qr-web/"; //local
 //    public static final String DOMINIO = "http://50.116.87.140/"; //remoto
 
     private final String API = "api/";
@@ -107,10 +109,11 @@ public class NetworkHelper {
                 callback);
     }
 
-    public void getProductByBarcode(String code, String userId, ResponseCallback callback) {
+    public void getProductByBarcode(String code, String userId, String typeSellId, ResponseCallback callback) {
         HashMap<String, String> params = new HashMap<>();
         params.put("code", code);
         params.put("user_id", userId);
+        params.put("type_level_id", typeSellId);
         execute(Request.Method.GET,
                 null,
                 TAG,
@@ -130,6 +133,7 @@ public class NetworkHelper {
 
     private void execute(int method, final HashMap params, String tag, String url, final ResponseCallback callback) {
         final CustomRequest request = new CustomRequest(
+                new SessionHelper(context).getUserToken(),
                 method,
                 url,
                 params,

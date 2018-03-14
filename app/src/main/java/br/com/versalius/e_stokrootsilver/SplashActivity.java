@@ -24,8 +24,7 @@ public class SplashActivity extends AppCompatActivity {
 
         final SessionHelper session = new SessionHelper(this);
         if(session.isLogged()){
-
-            NetworkHelper.getInstance(this).getUserById(session.getUserId(), new ResponseCallback() {
+            NetworkHelper.getInstance(this).getUserById(session.getUserId().toString(), new ResponseCallback() {
                 @Override
                 public void onSuccess(String jsonStringResponse) {
                     try {
