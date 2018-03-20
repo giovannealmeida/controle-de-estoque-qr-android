@@ -37,6 +37,7 @@ import java.util.List;
 
 import br.com.versalius.e_stokrootsilver.R;
 import br.com.versalius.e_stokrootsilver.adapters.SellAdapter;
+import br.com.versalius.e_stokrootsilver.interfaces.OnSellListChangeListener;
 import br.com.versalius.e_stokrootsilver.model.Product;
 import br.com.versalius.e_stokrootsilver.model.Sell;
 import br.com.versalius.e_stokrootsilver.network.NetworkHelper;
@@ -45,13 +46,14 @@ import br.com.versalius.e_stokrootsilver.utils.CustomSnackBar;
 import br.com.versalius.e_stokrootsilver.utils.PreferencesHelper;
 import br.com.versalius.e_stokrootsilver.utils.SessionHelper;
 
-public class SellActivity extends AppCompatActivity {
+public class SellActivity extends AppCompatActivity implements OnSellListChangeListener {
 
     private final int NEW_CLIENT_REQUEST_CODE = 1001;
     private Sell currentSell;
     private ProgressBar progressBar;
     private SellAdapter adapter;
     private String clientId = "";
+    private boolean isHistory = false; /* Determina se a activity foi iniciada para mostar histórico */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,7 @@ public class SellActivity extends AppCompatActivity {
             if (currentSell != null) {
                 /* Se tiver, carrega*/
                 getSupportActionBar().setTitle("Histórico de venda");
+                isHistory = true;
                 findViewById(R.id.btScan).setVisibility(View.GONE);
                 findViewById(R.id.btCheckout).setVisibility(View.GONE);
             } else {
@@ -340,6 +343,9 @@ public class SellActivity extends AppCompatActivity {
     }
 
     private void saveCurrentSell() {
+        if(isHistory){
+            return;
+        }
         try {
             Gson gson = new Gson();
             String sellJson = gson.toJson(currentSell, new TypeToken<Sell>() {
@@ -364,7 +370,7 @@ public class SellActivity extends AppCompatActivity {
     }
 
     private void setupList(Sell sell) {
-        adapter = new SellAdapter(this, sell);
+        adapter = new SellAdapter(this, sell, this);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list);
         LinearLayoutManager manager = new LinearLayoutManager(this);
         manager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -450,9 +456,22 @@ public class SellActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onProductRemoved(Product product) {
+        currentSell.getProducts().remove(product);
+        ((TextView) findViewById(R.id.tvTotalPrice)).setText("Total: " + currentSell.getTotalPrice() + "");
+        if (currentSell.getProducts().size() > 1) {
+            ((TextView) findViewById(R.id.tvQtdItems)).setText(currentSell.getProducts().size() + " itens");
+        } else {
+            ((TextView) findViewById(R.id.tvQtdItems)).setText(currentSell.getProducts().size() + " item");
+        }
+        saveCurrentSell();
+    }
+
     private class ProductItem {
         public int product_id;
         public int amount;
         public double value;
     }
+
 }

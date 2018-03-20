@@ -1,6 +1,8 @@
 package br.com.versalius.e_stokrootsilver.adapters;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,8 @@ import android.widget.Toast;
 import java.util.List;
 
 import br.com.versalius.e_stokrootsilver.R;
+import br.com.versalius.e_stokrootsilver.activities.SellActivity;
+import br.com.versalius.e_stokrootsilver.interfaces.OnSellListChangeListener;
 import br.com.versalius.e_stokrootsilver.model.Product;
 import br.com.versalius.e_stokrootsilver.model.Sell;
 
@@ -25,12 +29,14 @@ public class SellAdapter extends RecyclerView.Adapter<SellAdapter.ViewHolder> {
     private List<Product> list;
     private Sell sell;
     private LayoutInflater inflater;
+    private OnSellListChangeListener sellChangeListener;
 
-    public SellAdapter(Context context, Sell sell) {
+    public SellAdapter(Context context, Sell sell, OnSellListChangeListener sellChangeListener) {
         this.context = context;
         this.list = sell.getProducts();
         this.sell = sell;
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.sellChangeListener = sellChangeListener;
     }
 
     @Override
@@ -63,8 +69,18 @@ public class SellAdapter extends RecyclerView.Adapter<SellAdapter.ViewHolder> {
             btRemove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "Produto a ser removido: " + list.get(getAdapterPosition()).getName(), Toast.LENGTH_SHORT).show();
 
+                    new AlertDialog.Builder(context)
+                            .setMessage("Tem certeza que deseja remover \"" + list.get(getAdapterPosition()).getName() + "\"?")
+                            .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    sellChangeListener.onProductRemoved(list.remove(getAdapterPosition()));
+                                    notifyDataSetChanged();
+                                }
+                            })
+                            .setNegativeButton("Não", null)
+                            .show();
                 }
             });
         }

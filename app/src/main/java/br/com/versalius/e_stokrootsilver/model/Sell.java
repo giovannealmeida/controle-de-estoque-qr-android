@@ -1,10 +1,14 @@
 package br.com.versalius.e_stokrootsilver.model;
 
 import java.io.Serializable;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Giovanne on 17/10/2017.
@@ -60,7 +64,10 @@ public class Sell implements Serializable {
                 total += p.getValue();
             }
         }
-        return total;
+
+        DecimalFormat df = new DecimalFormat("##.##");
+        df.setRoundingMode(RoundingMode.UP);
+        return Double.valueOf(df.format(total).replace(",","."));
     }
 
     public void addProduct (Product product){

@@ -28,8 +28,8 @@ public class NetworkHelper {
     private static Context context;
     private RequestQueue requestQueue;
 
-    public static final String DOMINIO = "http://192.168.1.107/controle-de-estoque-qr-web/"; //local
-//    public static final String DOMINIO = "http://50.116.87.140/"; //remoto
+//    public static final String DOMINIO = "http://192.168.1.107/controle-de-estoque-qr-web/"; //local
+    public static final String DOMINIO = "http://www.rootssilver.com.br/"; //remoto
 
     private final String API = "api/";
     /*UserService*/
